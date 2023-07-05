@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.sportnews</groupId>
-	<artifactId>api</artifactId>
+	<artifactId>api-sport-news</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Sport News</name>
 	<description>Projeto Api Sport News</description>
@@ -45,6 +45,9 @@
 	</dependencies>
 
 	<build>
+		<finalName>
+			${project.artifactId}
+		</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -60,5 +63,25 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>default</spring.profiles.active>
+                <tag.version>${projects.version}</tag.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+                <tag.version>${projects.version}</tag.version>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

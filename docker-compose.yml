@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.9'
 
 services:
 
@@ -12,7 +12,23 @@ services:
       - "27017:27017"
     networks:
       - network_sport_news
-      
+
+  api:
+    container_name: container-api
+    image: api
+    environment:
+      - PROFILE=dev
+    build:
+      context: ./api-sport-news
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    entrypoint: /opt/bin/entrypoint.sh
+    depends_on:
+      - mongo
+    networks:
+      - network_sport_news
+
 volumes:
   .docker:
 

@@ -2,9 +2,10 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    active: @spring.profiles.active@
+
   data:
     mongodb:
-      host: localhost
-      port: 27017
+      uri: mongodb://localhost:27017
       database: sportnews
-      authentication-database: admin
