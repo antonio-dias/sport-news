@@ -1,5 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://container-mongodb:27017
+      host: localhost
+      port: 27017
       database: sportnews
+      authentication-database: admin

@@ -12,7 +12,20 @@ services:
       - "27017:27017"
     networks:
       - network_sport_news
-
+      
+  rabbitmq:
+    container_name: container-rabbitmq
+    image: 'rabbitmq:3.12.1-management-alpine'
+    ports:
+      - "5672:5672" # The standard AMQP protocol port
+      - "15672:15672" # HTTP management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    networks:
+      - network_sport_news
+      
   api:
     container_name: container-api
     image: api
@@ -28,7 +41,7 @@ services:
       - mongo
     networks:
       - network_sport_news
-
+      
 volumes:
   .docker:
 
