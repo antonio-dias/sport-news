@@ -3,10 +3,18 @@ from service.rabbitmq_service import RabbitMQ
 from service.scrapy_service import GameSpider
 from scrapy.crawler import CrawlerProcess
 from db.database import Database
+from scrapy import signals
+from scrapy.signalmanager import dispatcher
 
 
 def extract_game_info():
     try:
+
+        # Capturing the result from crawler
+        results = []
+        def crawler_results(signal, sender, item, response, spider):
+            results.append(item)
+        dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
         # WORKING WITH RABBITMQ
         # rabbitmq = RabbitMQ()
@@ -17,10 +25,13 @@ def extract_game_info():
         # else:
         #     print("nothing")
 
-        # GETING DATAS FROM GOOGLE
-        # process_crawler = CrawlerProcess()
-        # process_crawler.crawl(GameSpider)
-        # process_crawler.start()
+        # GETING DATAS FROM THE SITE
+        process_crawler = CrawlerProcess()
+        process_crawler.crawl(GameSpider, time=2)
+        process_crawler.start()
+
+        if len(results) > 0:
+            print(results)
 
         # SAVING TIMELINE IN MONGO
         # mongodb_connection = Database()

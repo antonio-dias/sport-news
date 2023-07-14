@@ -1,4 +1,4 @@
-FROM khipu/openjdk17-alpine
+FROM khipu/openjdk17-alpine@sha256:d0345d07b837f214b934afa3dbb94f076530a22e03bd2db64aefee2743e1d6a2
 
 RUN apk update && apk add netcat-openbsd
 

@@ -4,7 +4,7 @@ services:
 
   mongo:
     container_name: container-mongodb
-    image: mongo
+    image: mongo@sha256:a40f777b87a077a8a4801368aa17629e575413d6567872492135e26692499905
     restart: always
     volumes:
       - .docker/db-mongo:/data/db
@@ -15,7 +15,7 @@ services:
       
   rabbitmq:
     container_name: container-rabbitmq
-    image: 'rabbitmq:3.12.1-management-alpine'
+    image: 'rabbitmq:3.12.1-management-alpine@sha256:167f87c7a0ef0a4b034492108f21d92814d0d024d3b750dec84b88546b185486'
     ports:
       - "5672:5672" # The standard AMQP protocol port
       - "15672:15672" # HTTP management UI
