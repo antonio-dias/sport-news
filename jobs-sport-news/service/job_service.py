@@ -1,3 +1,5 @@
+import json
+
 from db.database import Database
 import logging
 from service.rabbitmq_service import RabbitMQ
@@ -13,7 +15,9 @@ def find_games_to_start():
         if len(data) > 0:
             rabbitmq = RabbitMQ()
             for message in data:
-                rabbitmq.send_message(message['title'])
+                message_json = json.dumps({"id": str(message['_id'])})
+                print(message_json)
+                rabbitmq.send_message(message_json)
             rabbitmq.close()
 
     except Exception as e:

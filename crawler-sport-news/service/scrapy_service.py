@@ -32,9 +32,8 @@ class GameSpider(scrapy.Spider):
         self.time = time
 
     def start_requests(self):
-        urls = ["https://www.google.com/search?q=libertadores#sie=m;/g/11tgdthmhp;2;/m/01rrc6;tl;fp;1;;;"]
+        # urls = ["https://www.google.com/search?q=libertadores#sie=m;/g/11tgdthmhp;2;/m/01rrc6;tl;fp;1;;;"]
         urls = ["https://www.terra.com.br/esportes/futebol/libertadores/ao-vivo/internacional-x-independiente-medellin/78492/"]
-        # urls = ["https://www.terra.com.br/esportes/futebol/brasileiro-serie-a/"]
         for url in urls:
             yield SeleniumRequest(
                 url=url,

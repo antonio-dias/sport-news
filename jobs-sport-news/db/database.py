@@ -1,5 +1,6 @@
 import os
 from pymongo import MongoClient
+from datetime import datetime
 
 
 class Database:
@@ -11,7 +12,7 @@ class Database:
     def find_all_games_to_start(self):
         try:
             collection_name = os.environ.get('COLLECTION_NAME')
-            filter_value = {'status': 'TO_START'}
+            filter_value = {'status': 'TO_START', "date": {"$lt": datetime.now()}}
             database = self.client[self.database_name]
             collection = database[collection_name]
             data_result = list(collection.find(filter=filter_value))
