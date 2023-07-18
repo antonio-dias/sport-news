@@ -9,7 +9,7 @@ class Database:
         self.client = MongoClient(os.environ.get('STRING_CONNECTION_MONGO'))
         self.database_name = os.environ.get('DATABASE_NAME')
 
-    def save_new_comment(self, _id, comment):
+    def save_new_comment(self, _id, comment, status_game):
         try:
             collection_name = os.environ.get('COLLECTION_NAME')
             filter_value = {'_id': ObjectId(_id)}
@@ -18,9 +18,22 @@ class Database:
 
             # data = collection.find_one(filter_value)
             # print("- ", data)
-            timeline_push = {"$push": {'timeline': comment}}
+            timeline_push = {"$set": {"status": status_game}, "$push": {'timeline': comment}}
+            print(timeline_push)
 
             collection.update_one(filter_value, timeline_push)
+
+        except Exception as e:
+            raise e
+
+    def find_game_to_crawl(self, _id):
+        try:
+            collection_name = os.environ.get('COLLECTION_NAME')
+            filter_value = {'_id': ObjectId(_id)}
+            database = self.client[self.database_name]
+            collection = database[collection_name]
+            data_result = collection.find_one(filter=filter_value)
+            return data_result
 
         except Exception as e:
             raise e

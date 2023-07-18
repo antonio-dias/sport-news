@@ -17,5 +17,6 @@ public class GameDto {
 	private Summary summary;
 	private Status status;
 	private LocalDateTime date;
+	private String url;
 	
 }
