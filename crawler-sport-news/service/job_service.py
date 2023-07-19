@@ -1,4 +1,5 @@
 import logging
+import json
 import schedule
 from service.rabbitmq_service import RabbitMQ
 from service.scrapy_service import GameSpider
@@ -9,33 +10,36 @@ from twisted.internet import reactor
 from db.database import Database
 from scrapy import signals
 from scrapy.signalmanager import dispatcher
+from datetime import datetime, timedelta
 
 
 def start_job_crawler():
-    schedule.every(30).seconds.do(extract_game_info)
-
-    while True:
-        schedule.run_pending()
-
     # WORKING WITH RABBITMQ
-    # rabbitmq = RabbitMQ()
-    # game_to_start = rabbitmq.init_consume()
-    # rabbitmq.close()
-    # if game_to_start is not None:
-    #     print(game_to_start)
-    #
-    # else:
-    #     print("nothing")
+    rabbitmq = RabbitMQ()
+    game_to_start = rabbitmq.init_consume()
+    rabbitmq.close()
+    if game_to_start is not None:
+        game = json.loads(game_to_start)
+        print(game)
+        until_date = datetime.strptime(game['date'], '%Y-%m-%d %H:%M:%S') + timedelta(hours=3)
+        schedule.every(1).minutes.until(until_date).do(extract_game_info, id=game['id'])
+
+        while True:
+            schedule.run_pending()
+
+    else:
+        print("nothing")
+
 
 # Control all jobs using multiprocess to crawler work without restart
-def extract_game_info():
+def extract_game_info(id):
     queue = Queue()
-    process = Process(target=crawler_action, args=(queue,))
+    process = Process(target=crawler_action, args=(queue, id))
     process.start()
     process.join()
 
 
-def crawler_action(queue):
+def crawler_action(queue, game_id):
     try:
         # Capturing the result from crawler
         results = []
@@ -46,9 +50,9 @@ def crawler_action(queue):
         dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
         mongodb_connection = Database()
-        _id = "64a776b16e8cdd16f2f2b096"
+        # _id = "64a776b16e8cdd16f2f2b096"
         # _id = "64a3826aca8392654a4b5c36"
-        game = mongodb_connection.find_game_to_crawl(_id)
+        game = mongodb_connection.find_game_to_crawl(game_id)
 
         if len(game) > 0:
 
@@ -69,7 +73,7 @@ def crawler_action(queue):
                 new_comment = results[0]
                 print("- ", new_comment)
 
-                mongodb_connection.save_new_comment(_id, new_comment, status_game="IN_PROGRESS")
+                mongodb_connection.save_new_comment(game_id, new_comment, status_game="IN_PROGRESS")
 
         mongodb_connection.close_connection()
 

@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from db.database import Database
 import logging
@@ -10,12 +11,12 @@ def find_games_to_start():
         mongodb_connection = Database()
         data = mongodb_connection.find_all_games_to_start()
         mongodb_connection.close_connection()
-        print("- ", data)
+        # print("- ", data)
 
         if len(data) > 0:
             rabbitmq = RabbitMQ()
             for message in data:
-                message_json = json.dumps({"id": str(message['_id'])})
+                message_json = json.dumps({"id": str(message['_id']), "date": str(message['date'])})
                 print(message_json)
                 rabbitmq.send_message(message_json)
             rabbitmq.close()
