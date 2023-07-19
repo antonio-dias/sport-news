@@ -1,16 +1,42 @@
 import logging
+import schedule
 from service.rabbitmq_service import RabbitMQ
 from service.scrapy_service import GameSpider
 from service.game_service import verify_halftime
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerRunner
+from multiprocessing import Process, Queue
+from twisted.internet import reactor
 from db.database import Database
 from scrapy import signals
 from scrapy.signalmanager import dispatcher
 
 
-def extract_game_info():
-    try:
+def start_job_crawler():
+    schedule.every(30).seconds.do(extract_game_info)
 
+    while True:
+        schedule.run_pending()
+
+    # WORKING WITH RABBITMQ
+    # rabbitmq = RabbitMQ()
+    # game_to_start = rabbitmq.init_consume()
+    # rabbitmq.close()
+    # if game_to_start is not None:
+    #     print(game_to_start)
+    #
+    # else:
+    #     print("nothing")
+
+# Control all jobs using multiprocess to crawler work without restart
+def extract_game_info():
+    queue = Queue()
+    process = Process(target=crawler_action, args=(queue,))
+    process.start()
+    process.join()
+
+
+def crawler_action(queue):
+    try:
         # Capturing the result from crawler
         results = []
 
@@ -18,15 +44,6 @@ def extract_game_info():
             results.append(item)
 
         dispatcher.connect(crawler_results, signal=signals.item_scraped)
-
-        # WORKING WITH RABBITMQ
-        # rabbitmq = RabbitMQ()
-        # game_to_start = rabbitmq.init_consume()
-        # rabbitmq.close()
-        # if game_to_start is not None:
-        #     print(game_to_start)
-        # else:
-        #     print("nothing")
 
         mongodb_connection = Database()
         _id = "64a776b16e8cdd16f2f2b096"
@@ -37,28 +54,25 @@ def extract_game_info():
 
             current_time = 1
             current_minute = -1
-            if (game.get("timeline")):
+            if game.get("timeline"):
                 last_comment = game.get("timeline")[-1]
                 current_time, current_minute = verify_halftime(last_comment)
 
-            # GETING DATAS FROM THE SITE
-            process_crawler = CrawlerProcess()
-            process_crawler.crawl(GameSpider, time=current_time, minute=current_minute)
-            process_crawler.start()
+            # GETTING DATAS FROM THE SITE
+            runner = CrawlerRunner()
+            deferred = runner.crawl(GameSpider, time=current_time, minute=current_minute)
+            deferred.addBoth(lambda _: reactor.stop())
+            reactor.run()
+            queue.put(None)
 
             if len(results) > 0:
-                comment = results[0]
-                print("- ", comment)
+                new_comment = results[0]
+                print("- ", new_comment)
 
-                mongodb_connection.save_new_comment(_id, comment, status_game="IN_PROGRESS")
+                mongodb_connection.save_new_comment(_id, new_comment, status_game="IN_PROGRESS")
 
         mongodb_connection.close_connection()
 
-        # SAVING TIMELINE IN MONGO
-        # mongodb_connection = Database()
-        # _id = "64a776b16e8cdd16f2f2b096"
-        # comment = {"time": "1", "minute": "2", "comment": "E FAAAAALTA", "published": False}
-        # mongodb_connection.save_new_comment(_id, comment)
-
     except Exception as e:
+        queue.put(e)
         logging.error(exc_info=True, msg=str(e))
