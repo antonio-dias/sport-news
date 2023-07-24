@@ -24,7 +24,7 @@ func NewServer(c *mongo.Client) *Server {
 func (s *Server) handleGetAllGames(w http.ResponseWriter, r *http.Request) {
 	coll := s.client.Database("sportnews").Collection("games")
 
-	query := bson.M{}
+	query := bson.M{"status": "IN_PROGRESS"}
 	cursor, err := coll.Find(context.TODO(), query)
 	if err != nil {
 		log.Fatal(err)
