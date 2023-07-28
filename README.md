@@ -1,5 +1,8 @@
 ## Project Sport News
 
+
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/antonio-dias/sport-news/blob/main/README.pt-br.md)
+
 This project will be developed to study Python, Kafka, MongoDB and other technologies.
 
 <hr>

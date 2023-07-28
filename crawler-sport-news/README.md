@@ -1,5 +1,7 @@
 ## Crawler-sport-news
 
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/antonio-dias/sport-news/blob/main/crawler-sport-news/README.pt-br.md)
+
 ### How to run the project:
 
 - Python version 3.11 or greater:
